@@ -13,25 +13,55 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { useState } from 'react';
+import { formatToCurrency } from '@/lib/utils';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Country } from '@/lib/types';
 
 const formSchema = z.object({
   customer: z.string().min(2, { message: 'Please pass a valid customer name' }),
   days: z.string().min(1, { message: 'Please pass a valid number of days' }),
+  rate: z.string().min(1, { message: 'Please Rate is required' }),
+  country: z.string().min(1),
 });
+
+const countries = [
+  { name: 'Portugal', id: 'PT' },
+  { name: 'United States', id: 'US' },
+  { name: 'England', id: 'UK' },
+];
 
 type FormType = z.infer<typeof formSchema>;
 
 export default function Home() {
+  const [message, setMessage] = useState<string>('');
+  const [currency, setCurrency] = useState<string | Country>('');
+
   const form = useForm<FormType>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       customer: '',
       days: '',
+      rate: '',
+      country: '',
     },
   });
 
   function onSubmit(values: FormType) {
-    console.log(values);
+    const { days, customer, rate, country } = values;
+    const invoiceTotal = formatToCurrency(country, Number(days) * Number(rate));
+    const username = 'Gabriel';
+
+    setMessage(
+      `Please can you generate an invoice for ${customer} regarding the ${days} days worked with rate of ${formatToCurrency(country, Number(rate))} giving the total of ${invoiceTotal}
+       Best regards, ${username}`,
+    );
   }
 
   return (
@@ -43,6 +73,44 @@ export default function Home() {
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-8 pb-6"
           >
+            <FormField
+              control={form.control}
+              name="country"
+              render={({ field }) => {
+                return (
+                  <FormItem>
+                    <FormLabel>Country</FormLabel>
+                    <Select
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        if (value === 'PT') {
+                          setCurrency('EUR');
+                        } else if (value === 'UK') {
+                          setCurrency('GBP');
+                        } else {
+                          setCurrency('USD');
+                        }
+                      }}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a country for the Invoice" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {countries.map((country) => (
+                          <SelectItem key={country.id} value={country.id}>
+                            {country.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
             <FormField
               control={form.control}
               name="customer"
@@ -63,7 +131,23 @@ export default function Home() {
                 <FormItem>
                   <FormLabel>Total of Days Worked:</FormLabel>
                   <FormControl>
-                    <Input placeholder="30" {...field} />
+                    <Input placeholder="30 days" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="rate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Current rate {currency && <>(in {currency})</>}:
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder="170€" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -73,18 +157,7 @@ export default function Home() {
           </form>
         </Form>
 
-        {parseInt(form.getValues().days) ? (
-          <>
-            <p>
-              {`Total of Invoice is
-              ${new Intl.NumberFormat('pt-PT', {
-                style: 'currency',
-                currency: 'EUR',
-              }).format(parseInt(form.getValues().days) * 170)}
-              for ${form.getValues().customer}`}
-            </p>
-          </>
-        ) : null}
+        {message && <p>{message}</p>}
       </main>
     </div>
   );
