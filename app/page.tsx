@@ -49,7 +49,7 @@ export default function Home() {
       customer: '',
       days: '',
       rate: '',
-      country: '',
+      country: 'PT',
     },
   });
 
