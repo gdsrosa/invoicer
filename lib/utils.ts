@@ -6,25 +6,26 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatToCurrency(
-  country: Country | string,
-  value: number,
-): string {
+export function formatToCurrency(country: Country, value: number): string {
   const countries = {
-    PT: 'pt-PT',
-    US: 'en-US',
-    UK: 'en-UK',
+    PT: {
+      language: 'pt-PT',
+      currency: 'EUR',
+    },
+    US: {
+      language: 'en-US',
+      currency: 'USD',
+    },
+    UK: {
+      language: 'en-UK',
+      currency: 'GBP',
+    },
   };
 
-  const currency = {
-    PT: 'EUR',
-    US: 'USD',
-    UK: 'GBP',
-  };
+  const { language, currency } = countries[country];
 
-  // TODO: fix typescript
-  return new Intl.NumberFormat(countries[country], {
+  return new Intl.NumberFormat(language, {
     style: 'currency',
-    currency: currency[country],
+    currency,
   }).format(value);
 }
