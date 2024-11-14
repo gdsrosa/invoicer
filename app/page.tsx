@@ -28,7 +28,7 @@ const formSchema = z.object({
   customer: z.string().min(2, { message: 'Please pass a valid customer name' }),
   days: z.string().min(1, { message: 'Please pass a valid number of days' }),
   rate: z.string().min(1, { message: 'Please Rate is required' }),
-  country: z.string().min(1),
+  country: z.custom<Country>(),
 });
 
 const countries = [
