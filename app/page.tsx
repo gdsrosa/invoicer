@@ -13,8 +13,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useState } from 'react';
-import { formatToCurrency } from '@/lib/utils';
+import { useEffect, useState } from 'react';
 import {
   Select,
   SelectContent,
@@ -23,10 +22,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Country } from '@/lib/types';
+import Invoice from '@/components/Invoice';
+import { createInvoice } from './actions';
 
 const formSchema = z.object({
-  customer: z.string().min(2, { message: 'Please pass a valid customer name' }),
-  days: z.string().min(1, { message: 'Please pass a valid number of days' }),
+  customer: z.string().min(2, { message: 'Please customer is required' }),
+  days: z.string().min(1, { message: 'Please Worked Days is required' }),
   rate: z.string().min(1, { message: 'Please Rate is required' }),
   country: z.custom<Country>(),
 });
@@ -40,7 +41,7 @@ const countries = [
 type FormType = z.infer<typeof formSchema>;
 
 export default function Home() {
-  const [message, setMessage] = useState<string>('');
+  const [showMessage, setShowMessage] = useState<boolean>(false);
   const [currency, setCurrency] = useState<string | Country>('');
 
   const form = useForm<FormType>({
@@ -52,16 +53,18 @@ export default function Home() {
       country: 'PT',
     },
   });
+  const props = form.getValues();
 
-  function onSubmit(values: FormType) {
-    const { days, customer, rate, country } = values;
-    const invoiceTotal = formatToCurrency(country, Number(days) * Number(rate));
-    const username = 'Gabriel';
+  useEffect(() => {
+    const { country } = form.getValues();
+    if (country === 'PT') {
+      setCurrency('EUR');
+    }
+  }, [form]);
 
-    setMessage(
-      `Please can you generate an invoice for ${customer} regarding the ${days} days worked with rate of ${formatToCurrency(country, Number(rate))} giving the total of ${invoiceTotal}
-       Best regards, ${username}`,
-    );
+  function onSubmit(invoice: FormType) {
+    createInvoice({ invoice });
+    setShowMessage(true);
   }
 
   return (
@@ -157,7 +160,7 @@ export default function Home() {
           </form>
         </Form>
 
-        {message && <p>{message}</p>}
+        {showMessage && <Invoice {...props} />}
       </main>
     </div>
   );
