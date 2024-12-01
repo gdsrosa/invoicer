@@ -1,32 +1,19 @@
 'use server';
 
 import { Invoice } from '@/lib/types';
-import { prisma } from '@/prisma/client';
 
 type CreateInvoiceProps = {
   invoice: Invoice;
 };
 
 export async function createInvoice({ invoice }: CreateInvoiceProps) {
-  const { customer, days, rate, country } = invoice;
-
   try {
-    const amount = Number(days) * Number(rate);
-    // Doing the round the keep only 2 numbers after separator
-    const invoiceAmount = parseFloat(amount.toFixed(2));
-
-    await prisma.invoices.create({
-      data: {
-        customer,
-        workedDays: Number(days),
-        rate,
-        country,
-        amount: invoiceAmount,
-      },
+    await fetch('http://localhost:3000/api/invoices', {
+      method: 'POST',
+      body: JSON.stringify(invoice),
+      headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    return {
-      message: `Database Error: Failed to Create Invoice. See ${error}`,
-    };
+    throw new Error(`Unable create Invoice. ${error}`);
   }
 }
