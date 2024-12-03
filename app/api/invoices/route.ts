@@ -1,3 +1,4 @@
+import { getInvoices } from '@/lib/data';
 import { prisma } from '@/prisma/client';
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -27,5 +28,14 @@ export async function POST(req: NextRequest) {
       message: 'Error: Failed to Create Invoice',
       error,
     };
+  }
+}
+
+export async function GET() {
+  try {
+    const invoices = await getInvoices();
+    return NextResponse.json(invoices);
+  } catch (error) {
+    return NextResponse.json({ error, message: 'unable to retrieve invoices' });
   }
 }
