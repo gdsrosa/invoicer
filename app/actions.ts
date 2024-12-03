@@ -8,11 +8,12 @@ type CreateInvoiceProps = {
 
 export async function createInvoice({ invoice }: CreateInvoiceProps) {
   try {
-    await fetch('http://localhost:3000/api/invoices', {
+    const { ok, status } = await fetch('http://localhost:3000/api/invoices', {
       method: 'POST',
       body: JSON.stringify(invoice),
       headers: { 'Content-Type': 'application/json' },
     });
+    return { response: { ok, status } };
   } catch (error) {
     throw new Error(`Unable create Invoice. ${error}`);
   }
