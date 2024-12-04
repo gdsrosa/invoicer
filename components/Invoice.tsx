@@ -1,12 +1,7 @@
-import { Country } from '@/lib/types';
+import { Invoice as InvoiceType } from '@/lib/types';
 import { formatToCurrency } from '@/lib/utils';
 
-type InvoiceProps = {
-  customer: string;
-  days: string;
-  rate: string;
-  country: Country;
-};
+type InvoiceProps = InvoiceType;
 
 export default function Invoice({
   workedDays,
