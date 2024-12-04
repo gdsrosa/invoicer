@@ -22,8 +22,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Country } from '@/lib/types';
-import Invoice from '@/components/Invoice';
 import { createInvoice } from './actions';
+import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
   customer: z.string().min(2, { message: 'Please customer is required' }),
@@ -41,7 +41,8 @@ const countries = [
 type FormType = z.infer<typeof formSchema>;
 
 export default function Home() {
-  const [showMessage, setShowMessage] = useState<boolean>(false);
+  const router = useRouter();
+  const [loading, setLoading] = useState<boolean>(false);
   const [currency, setCurrency] = useState<string | Country>('');
 
   const form = useForm<FormType>({
@@ -53,7 +54,6 @@ export default function Home() {
       country: 'PT',
     },
   });
-  const props = form.getValues();
 
   useEffect(() => {
     const { country } = form.getValues();
@@ -62,9 +62,16 @@ export default function Home() {
     }
   }, [form]);
 
-  function onSubmit(invoice: FormType) {
-    createInvoice({ invoice });
-    setShowMessage(true);
+  async function onSubmit(invoice: FormType) {
+    setLoading(true);
+    const { response } = await createInvoice({ invoice });
+
+    if (response.ok) {
+      setLoading(false);
+      router.push('/invoices');
+    } else {
+      console.log('unable to create invoice :/');
+    }
   }
 
   return (
@@ -160,7 +167,7 @@ export default function Home() {
           </form>
         </Form>
 
-        {showMessage && <Invoice {...props} />}
+        {loading && <p>Loading your table...</p>}
       </main>
     </div>
   );
