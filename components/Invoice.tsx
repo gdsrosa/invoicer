@@ -9,12 +9,15 @@ type InvoiceProps = {
 };
 
 export default function Invoice({
-  days,
+  workedDays,
   customer,
   rate,
   country,
 }: InvoiceProps) {
-  const invoiceTotal = formatToCurrency(country, Number(days) * Number(rate));
+  const invoiceTotal = formatToCurrency(
+    country,
+    Number(workedDays) * Number(rate),
+  );
   const username = 'Gabriel Rosa';
 
   return (
@@ -29,7 +32,7 @@ export default function Invoice({
           <strong>De:</strong> {username}
         </li>
         <li>
-          <strong>Período: </strong> {days} days worked
+          <strong>Período: </strong> {workedDays} days worked
         </li>
         <li>
           <strong>Valor diário: </strong>{' '}
