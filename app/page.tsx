@@ -27,7 +27,7 @@ import { createInvoice } from './actions';
 
 const formSchema = z.object({
   customer: z.string().min(2, { message: 'Please customer is required' }),
-  days: z.string().min(1, { message: 'Please Worked Days is required' }),
+  workedDays: z.string().min(1, { message: 'Please Worked Days is required' }),
   rate: z.string().min(1, { message: 'Please Rate is required' }),
   country: z.custom<Country>(),
 });
@@ -48,7 +48,7 @@ export default function Home() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       customer: '',
-      days: '',
+      workedDays: '',
       rate: '',
       country: 'PT',
     },
@@ -129,7 +129,7 @@ export default function Home() {
             />
             <FormField
               control={form.control}
-              name="days"
+              name="workedDays"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Total of Days Worked:</FormLabel>
