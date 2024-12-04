@@ -10,7 +10,7 @@ export async function createInvoice({ invoice }: CreateInvoiceProps) {
   try {
     const { ok, status } = await fetch('http://localhost:3000/api/invoices', {
       method: 'POST',
-      body: JSON.stringify(invoice),
+      body: JSON.stringify({ ...invoice, days: invoice.workedDays }),
       headers: { 'Content-Type': 'application/json' },
     });
     return { response: { ok, status } };
