@@ -19,6 +19,7 @@ import {
 } from '@tanstack/react-table';
 import { Invoice } from '@/lib/types';
 import { formatToCurrency } from '@/lib/utils';
+import { InvoicesSkeleton } from '../ui/skeletons';
 
 const columnHelper = createColumnHelper<Invoice>();
 
@@ -70,6 +71,10 @@ export default function Invoices() {
     }
     fetchInvoices();
   }, []);
+
+  if (loading) {
+    return <InvoicesSkeleton />;
+  }
 
   return (
     <div>
