@@ -7,8 +7,10 @@ type CreateInvoiceProps = {
 };
 
 export async function createInvoice({ invoice }: CreateInvoiceProps) {
+  const url = `${process.env.BASE_URL}/api/invoices`;
+
   try {
-    const { ok, status } = await fetch('http://localhost:3000/api/invoices', {
+    const { ok, status } = await fetch(url, {
       method: 'POST',
       body: JSON.stringify({ ...invoice, days: invoice.workedDays }),
       headers: { 'Content-Type': 'application/json' },
