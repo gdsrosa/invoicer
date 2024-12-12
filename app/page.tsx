@@ -1,8 +1,5 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -13,7 +10,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useEffect, useState } from 'react';
 import {
   Select,
   SelectContent,
@@ -22,8 +18,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Country } from '@/lib/types';
-import { createInvoice } from './actions';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { LoaderCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { createInvoice } from './actions';
 
 const formSchema = z.object({
   customer: z.string().min(2, { message: 'Please customer is required' }),
@@ -163,11 +164,17 @@ export default function Home() {
                 </FormItem>
               )}
             />
-            <Button type="submit">Invoice me!</Button>
+            <Button
+              type="submit"
+              variant="default"
+              className="disabled:opacity-75"
+              disabled={loading}
+            >
+              {loading && <LoaderCircle className="animate-spin" />}
+              Invoice me!
+            </Button>
           </form>
         </Form>
-
-        {loading && <p>Loading your table...</p>}
       </main>
     </div>
   );

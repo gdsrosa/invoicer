@@ -1,6 +1,19 @@
 'use client';
 
+import {
+  createColumnHelper,
+  flexRender,
+  getCoreRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  SortingState,
+  useReactTable,
+} from '@tanstack/react-table';
+import { ArrowLeft, ArrowUpDown } from 'lucide-react';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
+
+import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
@@ -9,14 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
-import {
-  createColumnHelper,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-} from '@tanstack/react-table';
+import { fetchInvoices } from '@/lib/api/client';
 import { Invoice } from '@/lib/types';
 import { formatToCurrency } from '@/lib/utils';
 import { InvoicesSkeleton } from '../ui/skeletons';
@@ -26,7 +32,15 @@ const columnHelper = createColumnHelper<Invoice>();
 const columns = [
   columnHelper.accessor('customer', {
     cell: ({ getValue }) => getValue(),
-    header: () => <span className="font-bold">Customer</span>,
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        className="font-bold px-0"
+      >
+        Customer <ArrowUpDown />
+      </Button>
+    ),
   }),
   columnHelper.accessor('country', {
     cell: ({ getValue }) => getValue(),
@@ -49,27 +63,23 @@ const columns = [
 
 export default function Invoices() {
   const [tableData, setTableData] = useState<Invoice[]>([]);
+  const [sorting, setSorting] = useState<SortingState>([]);
 
   const table = useReactTable({
     data: tableData,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    onSortingChange: setSorting,
+    state: {
+      sorting,
+    },
   });
+  const loading = !table.getPaginationRowModel().rows.length;
 
   useEffect(() => {
-    async function fetchInvoices() {
-      try {
-        const response = await fetch('http://localhost:3000/api/invoices', {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        });
-        const invoices = await response.json();
-        setTableData(invoices);
-      } catch (error) {
-        throw new Error(`Unable to fetch invoices: ${error}`);
-      }
-    }
-    fetchInvoices();
+    fetchInvoices().then((invoices) => setTableData(invoices));
   }, []);
 
   if (loading) {
@@ -77,13 +87,17 @@ export default function Invoices() {
   }
 
   return (
-    <div>
-      <Link className="flex mx-5 mt-1" href="/">
+    <div className="container mx-5 mt-1">
+      <Link className="flex " href="/">
         <ArrowLeft className="mr-2" />
         <span>Back</span>
       </Link>
-      <div className="container mx-5">
+
+      <div className="ml-5">
         <h1 className="text-2xl my-5">My Invoices</h1>
+        <p className="pb-2">
+          Total of {table.getPaginationRowModel().rows.length} invoice(s)
+        </p>
         <Table className="border w-full">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -111,6 +125,24 @@ export default function Invoices() {
             ))}
           </TableBody>
         </Table>
+      </div>
+      <div className="flex items-center justify-end space-x-2 py-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+        >
+          Previous
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+        >
+          Next
+        </Button>
       </div>
     </div>
   );
